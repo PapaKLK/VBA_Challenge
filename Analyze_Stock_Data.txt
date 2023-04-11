@@ -1,0 +1,150 @@
+Sub Analyze_Stock_Data()
+' ************************************************************************
+' Author:  Kevin Krause
+' KU Data Analytics Bootcamp
+' Module 2 Challenge
+' Due Date:  April 13, 2023
+' The purpose of this script is to calculate annual change in stock prices
+' and determine total stock volume for multiple years of stock information
+' *************************************************************************
+
+' Declare Variables
+  Dim C2O_Change_Percent As Double
+  Dim EOY_Closing_Price As Double
+  Dim BOY_Opening_Price As Double
+  Dim Prev_MAX_PCT As Double
+  Dim Prev_MIN_PCT As Double
+  Dim Prev_Greatest_Vol As Double
+  Dim Volume_Total As Double
+  Dim PRICE_CHANGE As Double
+  
+  Dim last_row As Long
+  Dim WorkSheetName As String
+  Dim StockYear As String
+  Dim Summary_Table_Row As Long
+  Dim Ticker_name As String
+  
+  
+   
+  Summary_Table_Row = 2
+ 
+' Analyze Data for Worksheet
+ For Each ws In Worksheets
+   ' Get Year for Worksheet (for testing only)
+   WorkSheetName = ws.Name
+   StockYear = WorkSheetName
+   
+   ' Initialize Data to find summary max and min change percents and max volume
+   lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+   Prev_MAX_PCT = 0
+   Prev_MIN_PCT = 0
+   Prev_Max_Volume = 0
+   Prev_Greatest_Vol = 0
+   
+   ' Create the New Column Headings for Each WorkSheet
+   ws.Range("I1").Value = "Ticker"
+   ws.Range("J1") = "Yearly Change"
+   ws.Range("J1").ColumnWidth = 12
+   ws.Range("K1") = "Percent Change"
+   ws.Range("K1").ColumnWidth = 14
+   ws.Range("L1") = "Total Stock Volume"
+   ws.Range("L1").ColumnWidth = 18
+   
+   ' Initialize data for the new worksheet totals
+   Volume_Total = 0
+   Summary_Table_Row = 2
+   BOY_Opening_Price = ws.Range("C2").Value
+   
+   ' Find Ticker Information on Each Worksheet
+   For i = 2 To lastrow
+    ' Check if we are still within the same ticker
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+      ' If on last ticker row for this ticker save the summary data
+      Volume_Total = Volume_Total + ws.Cells(i, 7).Value
+      Ticker_name = ws.Cells(i, 1)
+      ws.Range("I" & Summary_Table_Row).Value = Ticker_name
+      ws.Range("L" & Summary_Table_Row).Value = Volume_Total
+            
+      ' Calculate Year Price Change from Open to Closing Prices
+      EOY_Closing_Price = ws.Range("F" & i).Value
+      PRICE_CHANGE = EOY_Closing_Price - BOY_Opening_Price
+      ws.Range("J" & Summary_Table_Row).Value = PRICE_CHANGE
+      ws.Range("J" & Summary_Table_Row).NumberFormat = "0.00"
+      
+      If BOY_Opening_Price = 0 Then
+        C2O_Change_Percent = 0
+      Else
+        C2O_Change_Percent = Round(((PRICE_CHANGE / BOY_Opening_Price) * 1), 4)
+      End If
+      
+      ' Set Summary Cell Values
+      ws.Range("K" & Summary_Table_Row).Value = C2O_Change_Percent
+      ws.Range("K" & Summary_Table_Row).NumberFormat = "0.00%"
+      
+      ' Set cell color based on price_change (negative or positive)
+      Select Case PRICE_CHANGE
+        Case Is > 0
+          ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+        Case Is < 0
+          ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+        Case Else
+          ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 0
+      End Select
+      
+       ' Re-initialize summarization variables for next set of new ticker
+      BOY_Opening_Price = ws.Cells(i + 1, 3).Value
+      Summary_Table_Row = Summary_Table_Row + 1
+      Volume_Total = 0
+      
+    Else
+       ' Still in the same ticker so add to the Volume Total
+       Volume_Total = Volume_Total + ws.Cells(i, 7).Value
+    End If
+    
+    ' Keep track of the Greatest Percent Inrease, Greatest Percent Decrease and Greatest Total Volume
+    If C2O_Change_Percent > Prev_MAX_PCT Then
+      Prev_MAX_PCT = C2O_Change_Percent
+      Greatest_Incr_Symbol = ws.Range("A" & i)
+    End If
+    
+    If C2O_Change_Percent < Prev_MIN_PCT Then
+      Prev_MIN_PCT = C2O_Change_Percent
+      Greatest_dECR_Symbol = ws.Range("A" & i)
+    End If
+    
+    If Volume_Total > Prev_Greatest_Vol Then
+      Prev_Greatest_Vol = Volume_Total
+      Greatest_Vol_Symbol = ws.Range("A" & i)
+    End If
+    
+    
+    
+  Next i
+  
+  ' Populate and Format Cells on this worksheet with Data Collected above
+  
+  ws.Range("O1").Value = "Ticker"
+  ws.Range("P1").Value = "Value"
+  
+  ws.Range("N2") = "Greatest % Increase"
+  ws.Range("O2").Value = Greatest_Incr_Symbol
+  ws.Range("P2").Value = Prev_MAX_PCT
+  ws.Range("P2").NumberFormat = "0.00%"
+  
+  ws.Range("N3") = "Greatest % Descrease"
+  ws.Range("O3").Value = Greatest_dECR_Symbol
+  ws.Range("P3").Value = Prev_MIN_PCT
+  ws.Range("P3").NumberFormat = "0.00%"
+  
+  ws.Range("N4") = "Greatest Total Volume"
+  ws.Range("O4").Value = Greatest_Vol_Symbol
+  ws.Range("P4").Value = Prev_Greatest_Vol
+  
+  ws.Range("N4").ColumnWidth = 23
+  
+  ' Go To the Next WorkSheet for the next Year of Stock Data
+  Next ws
+
+
+End Sub
+
