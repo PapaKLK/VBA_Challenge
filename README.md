@@ -27,7 +27,7 @@ In the VBA_Challenge Repository you will find:
   * this ReadMe File
   * a PDF document that shows screenshots of the results for each year of 2018, 2019, and 2020 in a separate sheet.
     This file is called "Screenshots - Multiple_Year Stock Analysis Results.pdf"
-  * A notepad document that constains the Analyze_Stock_Data script is named "Analyze_Stock_Data.txt"
+  * A notepad document that constains the Analyze_Stock_Data script is named "Analyze_Stock_Data.txt" as well as"Analyze_Stock_Data.txt"
 
 
   * The full excel spreadsheet that contains the data and the Analyze_Stock_Data script included that has been executed resides in the following file on Google Drive:
